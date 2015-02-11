@@ -34,7 +34,7 @@ style: |
 
 # Контекстный подход в Ruby on Rails приложениях {#Cover}
 
-*Автор: [Давыденков Михаил](http://github/com/DavydenkovM/)*
+*Автор: [Давыденков Михаил](http://github.com/DavydenkovM/)*
 
 ![](pictures/cover.jpg)
 <!-- photo by John Carey, fiftyfootshadows.net -->
@@ -77,13 +77,13 @@ Lorem ipsum dolor sit amet, consectetur [adipisicing](#all-kind-of-lists) elit, 
 
 ## Code Samples
 
-    <!DOCTYPE html>
-    <html lang="en">
-    <mark><head></mark> <mark class="comment"><!--Comment--></mark>
-        <title>Shower</title>
-        <meta charset="<mark class="important">UTF-8</mark>">
-        <link rel="stylesheet" href="screen.css">
-    <mark></head></mark>
+~~~
+def foo
+  'bar'
+end
+~~~
+{: .language-ruby}
+
 
 ## Even Tables
 
