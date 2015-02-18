@@ -81,3 +81,8 @@ end
 
 ## ![](http://shwr.me/pictures/logo.svg) [Пример реализации контекстов в rails приложении](https://github.com/DavydenkovM/rails_contexts/)
 {:.shout #SeeMore}
+
+##  Картинка
+{:.cover :Picture}
+
+![](pictures/picture.jpg)
