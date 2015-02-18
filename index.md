@@ -94,11 +94,8 @@ end
 
 ~~~
 module Foo
-  def bar
-    'bar'
-  end
+  #...
 end
-
 method = Foo.instance_method(:bar)
 p method.bind(Object.new).call
 ~~~
@@ -107,14 +104,6 @@ p method.bind(Object.new).call
 
 ~~~
 module Surrounded
-  def context=(context)
-    @context = context
-  end
-
-  def context
-    @context
-  end
-
   def method_missing(method_name, *args, &block)
     if @context && @context.roles_include?(method_name)
       @context.role(method_name)
