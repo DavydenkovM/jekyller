@@ -82,7 +82,49 @@ end
 ## ![](http://shwr.me/pictures/logo.svg) [Пример реализации контекстов в rails приложении](https://github.com/DavydenkovM/rails_contexts/)
 {:.shout #SeeMore}
 
-## 
+## !
 {:.cover :Picture}
 
 ![](pictures/picture.jpg)
+
+## Делегация с помощью гема кастинг
+
+Гем используем возможность взять метод из модуля и забиндить его к любому объекту.
+Преимущество над object.extend(Module) в том, что бинд можно отменить с помощью unbind
+
+~~~
+module Foo
+  def bar
+    'bar'
+  end
+end
+
+method = Foo.instance_method(:bar)
+p method.bind(Object.new).call
+~~~
+
+## Гем Surrounded
+
+~~~
+module Surrounded
+  def context=(context)
+    @context = context
+  end
+
+  def context
+    @context
+  end
+
+  def method_missing(method_name, *args, &block)
+    if @context && @context.roles_include?(method_name)
+      @context.role(method_name)
+    else
+      super
+    end
+  end
+end
+
+class User
+  include Surrounded
+end
+~~~
