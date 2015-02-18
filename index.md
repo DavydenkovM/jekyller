@@ -39,7 +39,6 @@ style: |
 ![](pictures/cover.jpg)
 <!-- photo by John Carey, fiftyfootshadows.net -->
 
-
 ## Предпосылки:
 
 1. Парадигма MVC не предусматривает где живёт бизнес логика. Из-за этого бизнес логика имеет тенденцию размазываться по приложению.
@@ -53,69 +52,91 @@ style: |
 2. Сократить время понимания кода и упростить/ускорить процесс тестирования
 3. Быстро понимать какие роли(actors) вовлечены в тот или иной контекст
 
-{:.note}
-Shower ['ʃəuə] noun. A person or thing that shows.
+## Основные положения Data Context Interaction подхода
 
+1. Разделять стейт и поведение. Объект может заниматься ИЛИ хранением стейта(валидации, выборки из базы) ИЛИ управлять поведением(реализация алгоритмов)
+2. Введение в приложение объектов типа объект-контекст
+3. Представление бизнес-логики в виде сценариев
+4. Использование Convention over Configuration принципов для организации бизнес-логики в коде
 
-## Plain Text on Your Slides
+## Назначение контекст-объектов
 
-Lorem ipsum dolor sit amet, consectetur [adipisicing](#all-kind-of-lists) elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, *quis nostrud* exercitation ullamco laboris **nisi ut aliquip** ex ea commodo consequat. Duis aute irure <i>dolor</i> in reprehenderit in voluptate velit esse cillum <b>dolore</b> eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in `<culpa>` qui officia deserunt mollit anim id est laborum.
+1. Контекстные валидации
+2. Назначение ролей экторам
+3. Хранение алгоритмов, которые вызываются различными триггерами
+4. Взаимодействие с другими контекстами (методами экторов)
 
-## All Kind of Lists
-
-1. Simple lists are marked with bullets
-2. Ordered lists begin with a number
-3. You can even nest lists one inside another
-    - Or mix their types
-    - But do not go too far
-    - Otherwise audience will be bored
-4. Look, seven rows exactly!
-
-## Serious Citations
-
-<figure markdown="1">
-
-> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.
-
-<figcaption>Marcus Tullius Cicero</figcaption>
-</figure>
-
-## Code Samples
+## Структура контекст-объекта
 
 ~~~
-def foo
-  'bar'
+Class MoneyTransfering
+  # Блок инициализации c назначением ролей, создание карты ролей(хэш ролей), аксессоры, делегирование, валидации
+  # Блок триггеров
+  # Приватные методы
+  # Модули/классы экторов
 end
 ~~~
-{: .language-ruby}
 
-
-## Even Tables
-
-|  Locavore      | Umami       | Helvetica | Vegan     |
-+----------------|-------------|-----------|-----------+
-|* Fingerstache *| Kale        | Chips     | Keytar    |
-|* Sriracha     *| Gluten-free | Ennui     | Keffiyeh  |
-|* Thundercats  *| Jean        | Shorts    | Biodiesel |
-|* Terry        *| Richardson  | Swag      | Blog      |
-
-It’s good to have information organized.
-
-## Pictures
-{:.cover #Picture}
-
-![](pictures/picture.jpg)
-<!-- photo by John Carey, fiftyfootshadows.net -->
-
-## **You can even shout this way**
-
-## Inner Navigation
-
-1. Lets you reveal list items one by one
-2. …To keep some key points
-3. …In secret from audience
-4. …But it will work only once
-5. …Nobody wants to see the same joke twice
-
-## ![](http://shwr.me/pictures/logo.svg) [See more on GitHub](https://github.com/shower/shower/)
+## ![](http://shwr.me/pictures/logo.svg) [Пример реализации контекстов в rails приложении](https://github.com/DavydenkovM/rails_contexts/)
 {:.shout #SeeMore}
+
+/* Lorem ipsum dolor sit amet, consectetur [adipisicing](#all-kind-of-lists) elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, *quis nostrud* exercitation ullamco laboris **nisi ut aliquip** ex ea commodo consequat. Duis aute irure <i>dolor</i> in reprehenderit in voluptate velit esse cillum <b>dolore</b> eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in `<culpa>` qui officia deserunt mollit anim id est laborum. */
+
+/* ## All Kind of Lists */
+
+/* 1. Simple lists are marked with bullets */
+/* 2. Ordered lists begin with a number */
+/* 3. You can even nest lists one inside another */
+/*     - Or mix their types */
+/*     - But do not go too far */
+/*     - Otherwise audience will be bored */
+/* 4. Look, seven rows exactly! */
+
+/* ## Serious Citations */
+
+/* <figure markdown="1"> */
+
+/* > Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia. */
+
+/* <figcaption>Marcus Tullius Cicero</figcaption> */
+/* </figure> */
+
+/* ## Code Samples */
+
+/* ~~~ */
+/* def foo */
+/*   'bar' */
+/* end */
+/* ~~~ */
+/* {: .language-ruby} */
+
+
+/* ## Even Tables */
+
+/* |  Locavore      | Umami       | Helvetica | Vegan     | */
+/* +----------------|-------------|-----------|-----------+ */
+/* |* Fingerstache *| Kale        | Chips     | Keytar    | */
+/* |* Sriracha     *| Gluten-free | Ennui     | Keffiyeh  | */
+/* |* Thundercats  *| Jean        | Shorts    | Biodiesel | */
+/* |* Terry        *| Richardson  | Swag      | Blog      | */
+
+/* It’s good to have information organized. */
+
+/* ## Pictures */
+/* {:.cover #Picture} */
+
+/* ![](pictures/picture.jpg) */
+/* <!-- photo by John Carey, fiftyfootshadows.net --> */
+
+/* ## **You can even shout this way** */
+
+/* ## Inner Navigation */
+
+/* 1. Lets you reveal list items one by one */
+/* 2. …To keep some key points */
+/* 3. …In secret from audience */
+/* 4. …But it will work only once */
+/* 5. …Nobody wants to see the same joke twice */
+
+/* ## ![](http://shwr.me/pictures/logo.svg) [See more on GitHub](https://github.com/shower/shower/) */
+/* {:.shout #SeeMore} */
