@@ -32,88 +32,185 @@ style: |
         }
 ---
 
-# Контекстный подход в Ruby on Rails приложениях {#Cover}
+# Использование контрактов в Ruby on Rails приложениях (Design by Contract) {#Cover}
 
 *Автор: [Давыденков Михаил](http://github.com/DavydenkovM/)*
 
-![](pictures/cover.jpg)
+![](pictures/contract.jpg)
 <!-- photo by John Carey, fiftyfootshadows.net -->
 
-## Предпосылки:
+## Основная идея, история и требования к языку:
 
-1. Парадигма MVC не предусматривает где живёт бизнес логика. Из-за этого бизнес логика имеет тенденцию размазываться по приложению.
-2. Модели в классическом варианте нарушают принципы SRP и open/closed.
-3. Код статичен, неясно как одни методы взаимодействуют с другими.
-4. Тесты помогают понять, что происходит в приложении, однако они оторваны от кода и могут не отражать действительного функционирования программы
+1. Взаимодействие между объектами осуществляется через контракты, предусматривающие взаимные обязательства и преимущества (отношения клиент - поставщик).
+2. Термин предложен создателем языка Eiffel (Бертран Мейер). На уровне языка поддерживается в Clojure, Eiffell и других менее известных языках. В большинстве языков поддержка с помощью сторонних библиотек (Ruby и CoffeeScript в их числе).
+3. Для эффективного использования контрактов ЯП должен поддерживать наследование, динамическое связывание, способность обрабатывать исключения и возможноcть автоматического документирования ПО.
 
-## Цели:
+## Что такое контракт метода или функции:
 
-1. Инкапсулировать бизнес логику и отделить её от кода фреймворка (framework-agnostic code)
-2. Сократить время понимания кода и упростить/ускорить процесс тестирования
-3. Быстро понимать какие роли(actors) вовлечены в тот или иной контекст
+1. Обязательства (предусловия), которые дают преимущество для поставщика (он может не проверять выполнение предусловий).
+2. Свойства (постусловия).
+3. Инварианты (валидации). Свойства/state объекта, который не должен меняться до и после вызова метода/функции.
 
-## Основные положения Data Context Interaction подхода
-
-1. Разделять стейт и поведение. Объект может заниматься ИЛИ хранением стейта(валидации, выборки из базы) ИЛИ управлять поведением(реализация алгоритмов)
-2. Введение в приложение объектов типа объект-контекст
-3. Представление бизнес-логики в виде сценариев
-4. Использование Convention over Configuration принципов для организации бизнес-логики в коде
-
-## Назначение контекст-объектов
-
-1. Контекстные валидации
-2. Назначение ролей экторам
-3. Хранение алгоритмов, которые вызываются различными триггерами
-4. Взаимодействие с другими контекстами (методами экторов)
-
-## Структура контекст-объекта
+## Контракты в Ruby
 
 ~~~
-Class MoneyTransfering
-  # Блок инициализации c назначением ролей, 
-  # Создание карты ролей(хэш ролей), 
-  # Аксессоры, делегирование, валидации
-  # Блок триггеров
-  # Приватные методы
-  # Модули/классы экторов
+$ gem install contracts # inspired by contracts.coffee
+
+require 'contracts' # в application.rb
+include Contracts
+
+Contract Num => Num
+def double(x)
+  x * 2
+end
+
+puts double("oops")
+~~~
+
+## Пример нарушения контракта
+
+~~~
+./contracts.rb:34:in 'failure_callback': Contract violation: (RuntimeError)
+    Expected: Contracts::Num,
+    Actual: "oops"
+    Value guarded in: Object::double
+    With Contract: Contracts::Num, Contracts::Num
+    At: main.rb:6
+    ...stack trace...
+~~~
+
+## Структура failure_message
+
+~~~
+{
+  :arg => the argument to the method,
+  :contract => the contract that got violated,
+  :class => the method's class,
+  :method => the method,
+  :contracts => the contract object
+}
+~~~
+
+## Встроенные контракты
+
+contracts.ruby предусматривает большое количество встроенных контрактов:
+
+~~~
+Num, Pos, Neg, Nat, Bool, Any, None, 
+Or, Xor, Not, 
+ArrayOf, HashOf, Maybe, 
+RespondTo[:password, :credit_card], Send[:valid?], Exactly[Numeric]
+~~~
+
+## Создание собственных контрактов
+
+Контракты очень просто создать. Контрактом может быть:
+
+1. Название класса (String или Fixnum)
+2. Константа (nil или 1)
+3. Proc, принимающий значение и возвращающий true/false
+4. Класс, имеющий класс метод valid? 
+5. Объект, имеющий метод valid?
+
+## Кастомизации. Переписывание failure_callback
+
+~~~
+# initializer
+Contract.override_failure_callback do |data|
+  Rails.logger.error format(data)
+  Airbrake.notify_or_ignore(error_from_data(data))
 end
 ~~~
 
-## ![](http://shwr.me/pictures/logo.svg) [Пример реализации контекстов в rails приложении](https://github.com/DavydenkovM/rails_contexts/)
-{:.shout #SeeMore}
-
-## !
-{:.cover :Picture}
-
-![](pictures/picture.jpg)
-
-## Делегация с помощью гема кастинг
-
-Гем используем возможность взять метод из модуля и забиндить его к любому объекту.
-Преимущество над object.extend(Module) в том, что бинд можно отменить с помощью unbind
+## Кастомизации. Переписывание сообщений об ошибках
 
 ~~~
-module Foo
-  #...
+def Num.to_s
+  "a number please"
 end
-method = Foo.instance_method(:bar)
-p method.bind(Object.new).call
 ~~~
 
-## Гем Surrounded
+## Перегрузка методов и pattern matching
 
 ~~~
-module Surrounded
-  def method_missing(method_name, *args, &block)
-    if @context && @context.roles_include?(method_name)
-      @context.role(method_name)
-    else
-      super
-    end
+Contract Num => Num
+def fact x
+  if x == 1
+    x
+  else
+    x * fact(x - 1)
   end
 end
+~~~
 
-class User
-  include Surrounded
+
+## Перегрузка методов и pattern matching 2
+
+~~~
+Contract 1 => 1
+def fact x
+  x
+end
+
+Contract Num => Num
+def fact x
+  x * fact(x - 1)
 end
 ~~~
+
+## Перегрузка методов и pattern matching 3
+
+~~~
+Contract lambda{|n| n < 12 } => Ticket
+def get_ticket(age)
+  ChildTicket.new(age: age)
+end
+
+Contract lambda{|n| n >= 12 } => Ticket
+def get_ticket(age)
+  AdultTicket.new(age: age)
+end
+~~~
+
+## Контракты в модулях
+
+~~~
+module M
+  include Contracts
+  include Contracts::Modules
+
+  Contract String => String
+  def self.parse
+    # do some hard parsing
+  end
+end
+~~~
+
+## Инварианты
+
+~~~
+include Contracts::Invariants
+
+Invariant(:day) { 1 <= day && day <= 31 }
+Invariant(:month) { 1 <= month && month <= 12 }
+
+Contract None => Fixnum
+def silly_next_day!
+  self.day += 1
+end
+~~~
+
+## Производительность
+
+Заявлено, что контракты имееют минимальный slowdown по производительности.
+Бенчмарки метода, возвращающего сумму двух чисел (1_000_000 раз):
+
+~~~
+                                     user     system      total        real
+testing read                     1.200000   1.330000   2.530000 (  2.521314)
+testing contracts read           1.530000   1.370000   2.900000 (  2.903721)
+~~~
+
+## ![](http://shwr.me/pictures/logo.svg) [Пример реализации контрактов в rails приложении](https://github.com/DavydenkovM/rails_and_contracts/)
+{:.shout #SeeMore}
+
