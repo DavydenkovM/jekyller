@@ -32,7 +32,7 @@ style: |
         }
 ---
 
-# {#Cover}
+# Управление ассетами в rails приложениях {#Cover}
 
 *Автор: [Давыденков Михаил](http://github.com/DavydenkovM/)*
 
