@@ -32,182 +32,49 @@ style: |
         }
 ---
 
-# Использование контрактов в Ruby on Rails приложениях (Design by Contract) {#Cover}
+# Управление ассетами в Rails приложениях {#Cover}
 
 *Автор: [Давыденков Михаил](http://github.com/DavydenkovM/)*
 
-![](pictures/contract.jpg)
-<!-- photo by John Carey, fiftyfootshadows.net -->
+![](pictures/webpack.jpg)
 
-## Основная идея, история и требования к языку:
+## 5 способов управления ассетами в стандартных Rails приложениях
 
-1. Контракты предусматривают взаимные обязательства и преимущества (отношения клиент - поставщик).
-2. Из языка Eiffel (Бертран Мейер). На уровне языка поддерживается в Clojure, Eiffell и других менее известных языках. В большинстве языков поддержка с помощью сторонних библиотек.
-3. ЯП должен поддерживать наследование, динамическое связывание, обработку исключений и автоматическое документирования кода.
+1. /vendor/assets - старый способ (/lib/assets тоже самое)
+2. Использование готовых Ruby gems (например bootstrap)
+3. С использованием Bower (через npm)
+4. С использованием гема bower-rails gem
+5. С использованием гема rails-assets.org (addinional gem source)
 
-## Что такое контракт метода или функции:
+## Что в этих подходах плохого
 
-1. Обязательства (предусловия), которые дают преимущество для поставщика (он может не проверять выполнение предусловий).
-2. Свойства (постусловия).
-3. Инварианты (валидации). Свойства/state объекта, который не должен меняться до и после вызова метода/функции.
+1. /vendor/assets - как rails без бандлера, ручной режим, зависимости неуправляемы
+2. готовые Ruby gems - на каждую либу гемов не наделаешь, с гемами бывают проблемы, гемы не сопровождаются
+3. Bower уступает место npm и зачастую пакеты на него появляются с опозданием.
+4. см п.3
+5. rails-assets.org не успевает за развитием джаваскрипта.
 
-## Контракты в Ruby
+## Мотивация
 
-~~~
-$ gem install contracts # inspired by contracts.coffee
-require 'contracts' # в application.rb
-include Contracts
+1. Пользоваться последними новшествами без лишних трудностей и посредников.
+2. Использовать модули в JS и не зависеть от их форматов (будь то AMD, CommonJS, ES6 modules).
+3. Использовать линтеры, лив-релоадинг, тесты и другие интересности на node.js.
+4. Организовать архитектуру так как ты считаешь правильным с помощью модулей.
+5. Использовать компонентный подход (Marionette modules -> CommonJS, Ember and components, Angular 2 and web-components).
 
-Contract Num => Num
-def double(x)
-  x * 2
-end
-puts double("oops")
-~~~
+## Webpack - module bundler. Преимущества
 
-## Пример нарушения контракта
+1. Уменьшает размер скомпилированных ассетов засчёт dependency resolving алгоритмов
+2. Не зависит от формата модулей
+3. Хорошо дружит с assets pipeline и может компилировать для неё один или несколько файлов
+4. Может быть использован в development для LIVE RELOADING (как guard в рельсах для тестов)
+5. Подходит для больших проектов, быстро запускается, cache-friendly
+6. Развитая инфраструктура лоадеров и плагинов
 
-~~~
-./contracts.rb:34:in 'failure_callback': Contract violation: (RuntimeError)
-    Expected: Contracts::Num,
-    Actual: "oops"
-    Value guarded in: Object::double
-    With Contract: Contracts::Num, Contracts::Num
-    At: main.rb:6
-    ...stack trace...
-~~~
-
-## Структура failure_message
-
-~~~
-{
-  :arg => the argument to the method,
-  :contract => the contract that got violated,
-  :class => the method's class,
-  :method => the method,
-  :contracts => the contract object
-}
-~~~
-
-## Встроенные контракты
-
-contracts.ruby предусматривает большое количество встроенных контрактов:
-
-~~~
-Num, Pos, Neg, Nat, Bool, Any, None, 
-Or, Xor, Not, 
-ArrayOf, HashOf, Maybe, 
-RespondTo[:password, :credit_card], Send[:valid?], Exactly[Numeric]
-~~~
-
-## Создание собственных контрактов
-
-Контракты очень просто создать. Контрактом может быть:
-
-1. Название класса (String или Fixnum)
-2. Константа (nil или 1)
-3. Proc, принимающий значение и возвращающий true/false
-4. Класс, имеющий класс метод valid? 
-5. Объект, имеющий метод valid?
-
-## Кастомизации. Переписывание failure_callback
-
-~~~
-# initializer
-Contract.override_failure_callback do |data|
-  Rails.logger.error format(data)
-  Airbrake.notify_or_ignore(error_from_data(data))
-end
-~~~
-
-## Кастомизации. Переписывание сообщений об ошибках
-
-~~~
-def Num.to_s
-  "a number please"
-end
-~~~
-
-## Перегрузка методов и pattern matching
-
-~~~
-Contract Num => Num
-def fact x
-  if x == 1
-    x
-  else
-    x * fact(x - 1)
-  end
-end
-~~~
-
-## Перегрузка методов и pattern matching 2
-
-~~~
-Contract 1 => 1
-def fact x
-  x
-end
-
-Contract Num => Num
-def fact x
-  x * fact(x - 1)
-end
-~~~
-
-## Перегрузка методов и pattern matching 3
-
-~~~
-Contract lambda{|n| n < 12 } => Ticket
-def get_ticket(age)
-  ChildTicket.new(age: age)
-end
-
-Contract lambda{|n| n >= 12 } => Ticket
-def get_ticket(age)
-  AdultTicket.new(age: age)
-end
-~~~
-
-## Контракты в модулях
-
-~~~
-module M
-  include Contracts
-  include Contracts::Modules
-
-  Contract String => String
-  def self.parse
-    # do some hard parsing
-  end
-end
-~~~
-
-## Инварианты
-
-~~~
-include Contracts::Invariants
-
-Invariant(:day) { 1 <= day && day <= 31 }
-Invariant(:month) { 1 <= month && month <= 12 }
-
-Contract None => Fixnum
-def silly_next_day!
-  self.day += 1
-end
-~~~
-
-## Производительность
-
-Заявлено, что контракты имееют минимальный slowdown по производительности.
-Бенчмарки метода, возвращающего сумму двух чисел (1_000_000 раз):
-
-~~~
-                        total        real
-testing read            2.530000 (  2.521314)
-testing contracts read  2.900000 (  2.903721)
-~~~
-
-## ![](http://shwr.me/pictures/logo.svg) [Пример реализации контрактов в rails приложении](https://github.com/DavydenkovM/rails_and_contracts/)
+## ![](http://shwr.me/pictures/logo.svg) [Продолжение презентации](http://peerigon.github.io/presentations/2014-07-09-MNUG-webpack/#1)
 {:.shout #SeeMore}
+
+## ![](http://shwr.me/pictures/logo.svg) [Пример интеграции с рельсой](https://github.com/DavydenkovM/NTP.git)
+{:.shout #SeeMore}
+
 
