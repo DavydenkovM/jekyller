@@ -75,6 +75,6 @@ style: |
 {:.shout #SeeMore}
 
 ## ![](http://shwr.me/pictures/logo.svg) [Пример интеграции с рельсой](https://github.com/DavydenkovM/NTP.git)
-{:.shout #SeeMore}
+{:.shout #AndMore}
 
 
