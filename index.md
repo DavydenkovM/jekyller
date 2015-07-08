@@ -5,7 +5,7 @@ layout: ribbon
 style: |
 
     #Cover h2 {
-        margin:30px 0 0;
+        margin:-110px 0 0;
         color:#000;
         text-align:center;
         font-size:70px;
@@ -27,6 +27,10 @@ style: |
         font-size:100px
         }
     #SeeMore img {
+        width:0.72em;
+        height:0.72em;
+        }
+    #AndMore img {
         width:0.72em;
         height:0.72em;
         }
