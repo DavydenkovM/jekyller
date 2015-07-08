@@ -6,7 +6,7 @@ style: |
 
     #Cover h2 {
         margin:30px 0 0;
-        color:#FFF;
+        color:#000;
         text-align:center;
         font-size:70px;
         }
